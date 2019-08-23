@@ -170,7 +170,7 @@ class Ajax {
             wp_die( esc_html__( 'You do not have permission to change this order', 'dokan-lite' ) );
         }
 
-        $order = new WC_Order( $order_id );
+        $order = dokan()->orders->get( $order_id );
         $order->update_status( 'completed' );
 
         wp_safe_redirect( wp_get_referer() );
@@ -205,7 +205,7 @@ class Ajax {
             wp_die( esc_html__( 'You do not have permission to change this order', 'dokan-lite' ) );
         }
 
-        $order = new WC_Order( $order_id );
+        $order = dokan()->orders->get( $order_id );
         $order->update_status( 'processing' );
 
         wp_safe_redirect( wp_get_referer() );
@@ -227,7 +227,7 @@ class Ajax {
         $product_ids    = isset( $_POST['product_ids'] ) ? intval( $_POST['product_ids'] ) : 0;
         $loop           = isset( $_POST['loop'] ) ? intval( $_POST['loop'] ) : 0;
         $file_counter   = 0;
-        $order          = wc_get_order( $order_id );
+        $order          = dokan()->orders->get( $order_id );
 
         if ( ! is_array( $product_ids ) ) {
             $product_ids = array( $product_ids );
@@ -283,7 +283,7 @@ class Ajax {
         $order_id     = isset( $_POST['order_id'] ) ? intval( $_POST['order_id'] ) : '';
         $order_status = isset( $_POST['order_status'] ) ? sanitize_text_field( $_POST['order_status'] ) : '';
 
-        $order = wc_get_order( $order_id );
+        $order = dokan()->orders->get( $order_id );
         $order->update_status( $order_status );
 
         $statuses     = wc_get_order_statuses();
@@ -301,7 +301,6 @@ class Ajax {
      * Catches the form submission from store page
      */
     public function contact_seller() {
-
         check_ajax_referer( 'dokan_contact_seller' );
 
         $posted = $_POST;
@@ -376,7 +375,7 @@ class Ajax {
         $is_customer_note = ( $note_type == 'customer' ) ? 1 : 0;
 
         if ( $post_id > 0 ) {
-            $order      = wc_get_order( $post_id );
+            $order      = dokan()->orders->get( $post_id );
             $comment_id = $order->add_order_note( $note, $is_customer_note );
 
             echo '<li rel="' . esc_attr( $comment_id ) . '" class="note ';
@@ -397,7 +396,6 @@ class Ajax {
      * Add shipping tracking info via ajax
      */
     public function add_shipping_tracking_info() {
-
         if ( isset( $_POST['dokan_security_nonce'] ) && ! wp_verify_nonce( $_POST['dokan_security_nonce'], 'dokan_security_action' ) ) {
             die( -1 );
         }
@@ -423,10 +421,8 @@ class Ajax {
         }
 
         if ( $post_id > 0 ) {
-            $order      = wc_get_order( $post_id );
-            //$comment_id = $order->add_order_note( $note, $is_customer_note );
-
-            $time = current_time( 'mysql' );
+            $order = dokan()->orders->get( $post_id );
+            $time  = current_time( 'mysql' );
 
             $data = array(
                 'comment_post_ID'      => $post_id,
